@@ -32,6 +32,7 @@ from cryptography.x509.oid import AuthorityInformationAccessOID
 from cryptography.x509.oid import ExtendedKeyUsageOID
 from cryptography.x509.oid import ExtensionOID
 
+from .. import ca_settings
 from ..typehints import ParsableAuthorityInformationAccess
 from ..typehints import ParsableAuthorityKeyIdentifier
 from ..typehints import ParsableBasicConstraints
@@ -643,15 +644,10 @@ class ExtendedKeyUsage(
         "ipsecEndSystem": x509.ObjectIdentifier("1.3.6.1.5.5.7.3.5"),
         "ipsecTunnel": x509.ObjectIdentifier("1.3.6.1.5.5.7.3.6"),
         "ipsecUser": x509.ObjectIdentifier("1.3.6.1.5.5.7.3.7"),
-        "mdlDS": x509.ObjectIdentifier("1.0.18013.5.1.2"),
     }
-    _CRYPTOGRAPHY_MAPPING_REVERSED = {v: k for k, v in CRYPTOGRAPHY_MAPPING.items()}
-
-    KNOWN_PARAMETERS = sorted(CRYPTOGRAPHY_MAPPING)
-    """Known values that can be passed to this extension."""
 
     # Used by the HTML form select field
-    CHOICES = (
+    CHOICES = [
         ("serverAuth", "SSL/TLS Web Server Authentication"),
         ("clientAuth", "SSL/TLS Web Client Authentication"),
         ("codeSigning", "Code signing"),
@@ -663,9 +659,19 @@ class ExtendedKeyUsage(
         ("ipsecEndSystem", "IPSec EndSystem"),
         ("ipsecTunnel", "IPSec Tunnel"),
         ("ipsecUser", "IPSec User"),
-        ("mdlDS", "mdlDS"),
         ("anyExtendedKeyUsage", "Any Extended Key Usage"),
-    )
+    ]
+
+    custom_extensions: Tuple[tuple] = ca_settings.CA_CUSTOM_KEY_USAGE_EXTENSIONS
+    if custom_extensions:
+        for extension in custom_extensions:
+            CRYPTOGRAPHY_MAPPING.update({extension[1]: extension[2]})
+            CHOICES.append((extension[1], extension[0]))
+
+    _CRYPTOGRAPHY_MAPPING_REVERSED = {v: k for k, v in CRYPTOGRAPHY_MAPPING.items()}
+
+    KNOWN_PARAMETERS = sorted(CRYPTOGRAPHY_MAPPING)
+    """Known values that can be passed to this extension."""
 
     def from_extension(self, value: x509.ExtendedKeyUsage) -> None:
         self.value = set(value)

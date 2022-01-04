@@ -203,6 +203,16 @@ CA_CRL_PROFILES: typing.Dict[str, typing.Dict[str, typing.Any]] = getattr(
 )
 CA_PASSWORDS: typing.Dict[str, str] = getattr(settings, "CA_PASSWORDS", {})
 
+CA_CUSTOM_KEY_USAGE_EXTENSIONS = getattr(settings, "CA_CUSTOM_KEY_USAGE_EXTENSIONS", None)
+
+if CA_CUSTOM_KEY_USAGE_EXTENSIONS:
+    for extension in CA_CUSTOM_KEY_USAGE_EXTENSIONS:
+        if not len(extension) != 2:
+            msg = f"""Wrong CA_CUSTOM_KEY_USAGE_EXTENSIONS: {extension}.
+                  Should be: ('verbose_name', 'key', 'value').
+                  For example: ('Extension', 'extension', x509.ObjectIdentifier('1.0.18013.5.1.3'))"""
+            raise ImproperlyConfigured(msg)
+
 # ACME settings
 ACME_ORDER_VALIDITY: timedelta = getattr(settings, "CA_ACME_ORDER_VALIDITY", timedelta(hours=1))
 ACME_ACCOUNT_REQUIRES_CONTACT = getattr(settings, "CA_ACME_ACCOUNT_REQUIRES_CONTACT", True)
