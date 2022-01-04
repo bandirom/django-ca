@@ -662,7 +662,7 @@ class ExtendedKeyUsage(
         ("anyExtendedKeyUsage", "Any Extended Key Usage"),
     ]
 
-    custom_extensions: Tuple[tuple] = ca_settings.CA_CUSTOM_KEY_USAGE_EXTENSIONS
+    custom_extensions = ca_settings.CA_CUSTOM_KEY_USAGE_EXTENSIONS
     if custom_extensions:
         for extension in custom_extensions:
             CRYPTOGRAPHY_MAPPING.update({extension[1]: extension[2]})
